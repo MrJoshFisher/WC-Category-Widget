@@ -1,14 +1,14 @@
 <?php
 /*
-Plugin Name: 	Custom Woocommerce Category Widget
-Plugin URI: 	http://joshfisher.io/plugins/customwcwidget
+Plugin Name: 	customwcwidget.php
+Plugin URI: 	http://joshfisher.io/plugins/customwcwidget.php
 Description: 	This is a custom plugin build by Josh Fisher called customwcwidget.php.
 Author: 		Josh Fisher
-Version 		1.02
+Version 		1.0
 Author URI: 	http://joshfisher.io/
 License:		GPL2
 
-Copyright 2017 Josh Fisher
+Copyright 2015 Josh Fisher
 
 customwcwidget.php is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,8 +35,7 @@ class Custom_WC_Widget extends WP_Widget {
 		);
 		parent::__construct( 'custom_wc_widget',__( 'Custom WC Widget', 'customwcwidgettextdomain' ), $widget_ops );
 	}
-	
-	
+
 	public function widget( $args, $instance ) {
 		
 		
@@ -49,79 +48,23 @@ class Custom_WC_Widget extends WP_Widget {
 		$cateID = $cate->term_id;
 		$cateNM = $cate->name;
 		
-		$wcatTerms = get_terms('product_cat', array(
-						'hide_empty' => 1, 
-						'orderby' => 'ASC', 
-						'orderby' => 'name',
-						'parent' => $cateID, 
-		)); 
-		
+		$wcatTerms = get_terms('product_cat', array('hide_empty' => 1, 'orderby' => 'ASC', 'parent' => $cateID, )); 
         
-        $catsToShow = [$wcatTerms];
-        $catsOpened = ['']; 
-        $cId = $cateID;
-        $parentId = $cate->parent;
-        while($cId != '') {
-            $siblings = get_terms('product_cat', array(
-                            'hide_empty' => 1, 
-                            'orderby' => 'ASC', 
-                            'orderby' => 'name',
-                            'parent' => $parentId, 
-            )); 
-            $catsToShow[]=$siblings;
-            $catsOpened[]=$cId;
-            if ($parentId == 0) {
-                break;
-            }
-            $parentItem = get_term($parentId);
-            if (count($parentItem) == 0) {
-                $cId = '';
-                break;
-            } else {
-                $parentId = $parentItem->parent;
-                $cId = $parentItem->term_id;
-            }
-        }
-          $this->showCategories($catsToShow, $catsOpened, $cateID); 
-		
-		echo $args['after_widget'];
-	}
-	
-	
-	
-    private function showCategories($catsToShow, $catsOpened, $realCateID) {
-        $wcatTerms = array_pop($catsToShow);
-        $openCateID = array_pop($catsOpened);
-
         echo '<ul style="padding: 0px 10px;" class="product-categories"><li class="cat-item cat-parent">';
-        
+        echo '<a style="color: #1e1d1d ;font-size: 13px;font-weight: bold;line-height: 1.7;padding: 2px 0 2px 3px;margin: 0;font-family: "Roboto Condensed",sans-serif;" href="#">' . $cateNM . '</a>';
+        echo '<ul style="padding-left: 15px;" class="children">';
         foreach($wcatTerms as $wcatTerm) : 
-        	
-        	
-        
-       		?>
-		    
-		    <li style="color: #1e1d1d;" class="cat-item">
-                <a  style="color: #1e1d1d;<?php if (!is_null($realCateID) && $realCateID == $wcatTerm->term_id) {echo 'font-weight:bold;';}?>" href="<?php echo get_term_link( $wcatTerm->slug, $wcatTerm->taxonomy ); ?>"><?php echo $wcatTerm->name; ?></a>
-
-            <?php
-	            if ($wcatTerm->term_id == $openCateID && count($catsToShow) > 0) {
-	                $this->showCategories($catsToShow, $catsOpened, $realCateID);
-	            }	
-            ?>
-
-		    </li>
-		    
+        $wthumbnail_id = get_woocommerce_term_meta( $wcatTerm->term_id, 'thumbnail_id', true );
+        $wimage = wp_get_attachment_url( $wthumbnail_id );
+	    ?>
+	    <li class="cat-item"><a rel="nofollow" href="<?php echo get_term_link( $wcatTerm->slug, $wcatTerm->taxonomy ); ?>"><?php echo $wcatTerm->name; ?></a></li>
 	    
-			<?php 
-				
-				    
-		endforeach; 
-		   
-		   echo '</ul>';
-    }		
-
-	
+	    <?php endforeach; 
+		   echo '</ul></li></ul>';
+		echo $args['after_widget'];
+		
+		
+	}
 
 	public function form( $instance ) {
 		
@@ -163,3 +106,4 @@ class Custom_WC_Widget extends WP_Widget {
 add_action( 'widgets_init', function(){
 	register_widget( 'Custom_WC_Widget' );
 });
+
