@@ -1,14 +1,14 @@
 <?php
 /*
-Plugin Name: 	customwcwidget.php
-Plugin URI: 	http://joshfisher.io/plugins/customwcwidget.php
+Plugin Name: 	Custom Woocommerce Category Widget
+Plugin URI: 	http://joshfisher.io/plugins/customwcwidget
 Description: 	This is a custom plugin build by Josh Fisher called customwcwidget.php.
 Author: 		Josh Fisher
-Version 		1.0
+Version 		1.01
 Author URI: 	http://joshfisher.io/
 License:		GPL2
 
-Copyright 2015 Josh Fisher
+Copyright 2017 Josh Fisher
 
 customwcwidget.php is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,7 +35,8 @@ class Custom_WC_Widget extends WP_Widget {
 		);
 		parent::__construct( 'custom_wc_widget',__( 'Custom WC Widget', 'customwcwidgettextdomain' ), $widget_ops );
 	}
-
+	
+	
 	public function widget( $args, $instance ) {
 		
 		
@@ -48,23 +49,60 @@ class Custom_WC_Widget extends WP_Widget {
 		$cateID = $cate->term_id;
 		$cateNM = $cate->name;
 		
-		$wcatTerms = get_terms('product_cat', array('hide_empty' => 1, 'orderby' => 'ASC', 'parent' => $cateID, )); 
+		$wcatTerms = get_terms('product_cat', array(
+						'hide_empty' => 1, 
+						'orderby' => 'ASC', 
+						'orderby' => 'name',
+						'parent' => $cateID, 
+		)); 
+		
+        
+        $realCateID = null;
+        
+        if (count($wcatTerms) == 0 && !is_null($cate)) {
+            $realCateID = $cateID;
+            $cateID = $cate->term_id;
+            $cateNM = $cate->name;
+            $wcatTerms = get_terms('product_cat', array(
+                            'hide_empty' => 1, 
+                            'orderby' => 'ASC', 
+                            'orderby' => 'name',
+                            'parent' => $cate->parent, 
+            )); 
+        }
+
+		    
+        
+        //echo get_category_parents( $cateID, true, '<br/>' );
         
         echo '<ul style="padding: 0px 10px;" class="product-categories"><li class="cat-item cat-parent">';
         echo '<a style="color: #1e1d1d ;font-size: 13px;font-weight: bold;line-height: 1.7;padding: 2px 0 2px 3px;margin: 0;font-family: "Roboto Condensed",sans-serif;" href="#">' . $cateNM . '</a>';
         echo '<ul style="padding-left: 15px;" class="children">';
+        
         foreach($wcatTerms as $wcatTerm) : 
-        $wthumbnail_id = get_woocommerce_term_meta( $wcatTerm->term_id, 'thumbnail_id', true );
-        $wimage = wp_get_attachment_url( $wthumbnail_id );
-	    ?>
-	    <li class="cat-item"><a rel="nofollow" href="<?php echo get_term_link( $wcatTerm->slug, $wcatTerm->taxonomy ); ?>"><?php echo $wcatTerm->name; ?></a></li>
+        	
+        	
+        
+       		?>
+		    
+		    <li style="color: #1e1d1d;" class="cat-item">
+                <a  style="color: #1e1d1d;<?php if (!is_null($realCateID) && $realCateID == $wcatTerm->term_id) {echo 'font-weight:bold;';}?>" href="<?php echo get_term_link( $wcatTerm->slug, $wcatTerm->taxonomy ); ?>"><?php echo $wcatTerm->name; ?></a>
+		    </li>
+		    
 	    
-	    <?php endforeach; 
+			<?php 
+				
+				
+				    
+		endforeach; 
+		   
 		   echo '</ul></li></ul>';
+		
+		
 		echo $args['after_widget'];
-		
-		
 	}
+
+	
 
 	public function form( $instance ) {
 		
@@ -106,4 +144,3 @@ class Custom_WC_Widget extends WP_Widget {
 add_action( 'widgets_init', function(){
 	register_widget( 'Custom_WC_Widget' );
 });
-
