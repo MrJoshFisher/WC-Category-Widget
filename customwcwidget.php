@@ -4,7 +4,7 @@ Plugin Name: 	Custom Woocommerce Category Widget
 Plugin URI: 	http://joshfisher.io/plugins/customwcwidget
 Description: 	This is a custom plugin build by Josh Fisher called customwcwidget.php.
 Author: 		Josh Fisher
-Version 		1.03
+Version 		1.04
 Author URI: 	http://joshfisher.io/
 License:		GPL2
 
@@ -71,7 +71,8 @@ class Custom_WC_Widget extends WP_Widget {
             $catsToShow[]=$siblings;
             $catsOpened[]=$cId;
             if ($parentId == 0) {
-                if (count($catsToShow) > 2) {
+                //hide top categories except the case if choosen top category does not have children
+                if (count($catsToShow) != 2 || count($wcatTerms) != 0) {
                     $catsToShow = $this->removeTopCategories($catsToShow, $catsOpened);
                 }
                 break;
