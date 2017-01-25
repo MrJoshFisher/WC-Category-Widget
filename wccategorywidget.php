@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: 	Custom Woocommerce Category Widget
-Plugin URI: 	http://joshfisher.io/plugins/customwcwidget
-Description: 	This is a custom plugin build by Josh Fisher called customwcwidget.php.
+Plugin Name: 	Woocommerce Category Widget
+Plugin URI: 	http://joshfisher.io/plugins/wccategorywidget
+Description: 	This is a custom plugin build by Josh Fisher called wccategorywidget.php.
 Author: 		Josh Fisher
 Version 		1.04
 Author URI: 	http://joshfisher.io/
@@ -10,18 +10,18 @@ License:		GPL2
 
 Copyright 2017 Josh Fisher
 
-customwcwidget.php is free software: you can redistribute it and/or modify
+wccategorywidget.php is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 2 of the License, or
 any later version.
  
-customwcwidget.php is distributed in the hope that it will be useful,
+wccategorywidget.php is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
  
 You should have received a copy of the GNU General Public License
-along with customwcwidget.php. If not, see http://joshfisher.io.
+along with wccategorywidget.php. If not, see http://joshfisher.io.
 */
 
 
