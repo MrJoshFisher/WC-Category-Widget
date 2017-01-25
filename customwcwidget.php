@@ -39,16 +39,19 @@ class Custom_WC_Widget extends WP_Widget {
 	
 	public function widget( $args, $instance ) {
 		
-		
 		$title 	 = apply_filters( 'widget_title', $instance['title'] );
 		echo $args['before_widget'];
 		if ( ! empty( $title ) )
 			echo $args['before_title'] . $title . $args['after_title'];
 		
+		
 		$cate = get_queried_object();
+		//Category ID
 		$cateID = $cate->term_id;
+		//Category Name
 		$cateNM = $cate->name;
 		
+		//Get sub categories of the selected category
 		$wcatTerms = get_terms('product_cat', array(
 						'hide_empty' => 1, 
 						'orderby' => 'ASC', 
@@ -71,7 +74,8 @@ class Custom_WC_Widget extends WP_Widget {
             $catsToShow[]=$siblings;
             $catsOpened[]=$cId;
             if ($parentId == 0) {
-                //hide top categories except the case if choosen top category does not have children
+                
+                //Hide top categories except the case if choosen top category does not have children
                 if (count($catsToShow) != 2 || count($wcatTerms) != 0) {
                     $catsToShow = $this->removeTopCategories($catsToShow, $catsOpened);
                 }
@@ -86,10 +90,12 @@ class Custom_WC_Widget extends WP_Widget {
                 $cId = $parentItem->term_id;
             }
         }
-          $this->showCategories($catsToShow, $catsOpened, $cateID); 
+        $this->showCategories($catsToShow, $catsOpened, $cateID); 
 		
 		echo $args['after_widget'];
 	}
+	
+	
     /**
      * removes top categories except direct parent
      *
@@ -98,6 +104,7 @@ class Custom_WC_Widget extends WP_Widget {
      *
      * @return array 
      */
+     
     private function removeTopCategories($catsToShow, $catsOpened) {
         $top = array_pop($catsToShow);
         $opened = array_pop($catsOpened);
@@ -111,36 +118,30 @@ class Custom_WC_Widget extends WP_Widget {
         $catsToShow[]=[$res];
         return $catsToShow;
     }
+    
+    
     private function showCategories($catsToShow, $catsOpened, $realCateID) {
         $wcatTerms = array_pop($catsToShow);
         $openCateID = array_pop($catsOpened);
 
         echo '<ul style="padding: 0px 10px;" class="product-categories"><li class="cat-item cat-parent">';
         
-        foreach($wcatTerms as $wcatTerm) : 
-        	
-        	
-        
-       		?>
+        foreach($wcatTerms as $wcatTerm) : ?>
 		    
 		    <li style="color: #1e1d1d;" class="cat-item">
                 <a  style="color: #1e1d1d;<?php if (!is_null($realCateID) && $realCateID == $wcatTerm->term_id) {echo 'font-weight:bold;';}?>" href="<?php echo get_term_link( $wcatTerm->slug, $wcatTerm->taxonomy ); ?>"><?php echo $wcatTerm->name; ?></a>
 
-            <?php
-            if ($wcatTerm->term_id == $openCateID && count($catsToShow) > 0) {
+            <?php if ($wcatTerm->term_id == $openCateID && count($catsToShow) > 0) {
                 $this->showCategories($catsToShow, $catsOpened, $realCateID);
-            }	
-            ?>
+            } ?>
 
 		    </li>
 		    
-	    
-			<?php 
+	    <?php 
 				
-				    
 		endforeach; 
 		   
-		   echo '</ul>';
+		echo '</ul>';
     }		
 
 	
@@ -153,7 +154,6 @@ class Custom_WC_Widget extends WP_Widget {
 		} else {
 			$title = __( 'New title', 'customwcwidgettextdomain' );
 		}
-		
 		
 		?>
 		<p>
