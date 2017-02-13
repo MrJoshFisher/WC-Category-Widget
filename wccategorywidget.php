@@ -4,7 +4,7 @@ Plugin Name: 	Woocommerce Category Widget
 Plugin URI: 	http://joshfisher.io/plugins/wccategorywidget
 Description: 	This is a custom plugin build by Josh Fisher called wccategorywidget.php.
 Author: 		Josh Fisher
-Version 		1.04
+Version 		1.05
 Author URI: 	http://joshfisher.io/
 License:		GPL2
 
@@ -39,122 +39,85 @@ class Custom_WC_Widget extends WP_Widget {
 	
 	public function widget( $args, $instance ) {
 		
+		
 		$title 	 = apply_filters( 'widget_title', $instance['title'] );
 		echo $args['before_widget'];
 		if ( ! empty( $title ) )
 			echo $args['before_title'] . $title . $args['after_title'];
 		
-		
 		$cate = get_queried_object();
-		//Category ID
 		$cateID = $cate->term_id;
-		//Category Name
 		$cateNM = $cate->name;
 		
-		//Get sub categories of the selected category
-		$wcatTerms = get_terms('product_cat', array(
-						'hide_empty' => 1, 
-						'orderby' => 'ASC', 
-						'orderby' => 'name',
-						'parent' => $cateID, 
-		)); 
-		
-        
-        $catsToShow = [$wcatTerms];
-        $catsOpened = ['']; 
-        $cId = $cateID;
-        $parentId = $cate->parent;
-        while($cId != '') {
-            $siblings = get_terms('product_cat', array(
-                            'hide_empty' => 1, 
-                            'orderby' => 'ASC', 
-                            'orderby' => 'name',
-                            'parent' => $parentId, 
-            )); 
-            $catsToShow[]=$siblings;
-            $catsOpened[]=$cId;
-            if ($parentId == 0) {
-                
-                //Hide top categories except the case if choosen top category does not have children
-                if (count($catsToShow) != 2 || count($wcatTerms) != 0) {
-                    $catsToShow = $this->removeTopCategories($catsToShow, $catsOpened);
-                }
-                break;
-            }
-            $parentItem = get_term($parentId);
-            if (count($parentItem) == 0) {
-                $cId = '';
-                break;
+		?>
+		<style>
+		#customcwidget {
+			text-align: left;
+			padding: 0px 5px;
+		}
+		#customcwidget .ccw-plus {
+		    width: 15px;
+		    height: 15px;
+		    float: right;
+		    background-position: left center;
+		    background-repeat: no-repeat;
+		    background-image: url(data:image/gif;base64,R0lGODlhMgAQAJECAGZmZv///////wAAACH5BAEAAAIALAAAAAAyABAAAAJOjI8Zwu3flJzUwPuq1riLrQGA5GFgJZIldFKpsrKt9CZxNhvizo/WHdH1eIoh8Qf8CI2+SQ2RZOSKTWh0mngeokqsUJX0brhizrVMIbcKADs=);
+		    cursor: pointer;
+		}
+		#customcwidget .children {
+		    margin-left: 5px;
+		    padding-left: 10px;
+		    display: none;
+		}
+		#customcwidget .current-cat-parent > .ccw-plus, #customcwidget .current-cat > .ccw-plus {
+		    background-position: right center;
+		}
+		#customcwidget .current-cat-parent > ul.children, #customcwidget .current-cat > ul.children {
+		    display: block;
+		}
+		</style>
+		<script>
+        //<![CDATA[
+        function ccwExpand(e) {
+            ge = e;
+            var eparent = e.parentElement;
+            if (eparent.getElementsByTagName("ul")[0].style.display != "block") {
+                    eparent.getElementsByTagName("ul")[0].style.display="block";
+                    e.style.backgroundPosition="right center";
             } else {
-                $parentId = $parentItem->parent;
-                $cId = $parentItem->term_id;
+                    eparent.getElementsByTagName("ul")[0].style.display="none";
+                    e.style.backgroundPosition="left center";
             }
         }
-        $this->showCategories($catsToShow, $catsOpened, $cateID); 
+        //]]
+		</script>
+		<?php
+        //get categories tree
+        $cats = wp_list_categories([
+            'taxonomy'=>'product_cat',
+            'current_category'=>$cateID,
+            'title_li'=>'',
+            'echo'=>false,
+        ]);
+        
+        //embed open/close control
+        $cats = preg_replace('/<ul[^>]+children[^>]*>/i', '<span onclick="ccwExpand(this);" class="ccw-plus"></span>$0', $cats);
+        echo '<ul id="customcwidget">';
+        echo $cats;
+        echo '</ul>';
 		
 		echo $args['after_widget'];
 	}
 	
 	
-    /**
-     * removes top categories except direct parent
-     *
-     * @param array $catsToShow
-     * @param array $catsOpened
-     *
-     * @return array 
-     */
-     
-    private function removeTopCategories($catsToShow, $catsOpened) {
-        $top = array_pop($catsToShow);
-        $opened = array_pop($catsOpened);
-        $res = null;
-        foreach($top as $e) {
-            if ($e->term_id == $opened) {
-                $res = $e;
-                break;
-            }
-        }
-        $catsToShow[]=[$res];
-        return $catsToShow;
-    }
-    
-    
-    private function showCategories($catsToShow, $catsOpened, $realCateID) {
-        $wcatTerms = array_pop($catsToShow);
-        $openCateID = array_pop($catsOpened);
-
-        echo '<ul style="padding: 0px 10px;" class="product-categories"><li class="cat-item cat-parent">';
-        
-        foreach($wcatTerms as $wcatTerm) : ?>
-		    
-		    <li style="color: #1e1d1d;" class="cat-item">
-                <a  style="color: #1e1d1d;<?php if (!is_null($realCateID) && $realCateID == $wcatTerm->term_id) {echo 'font-weight:bold;';}?>" href="<?php echo get_term_link( $wcatTerm->slug, $wcatTerm->taxonomy ); ?>"><?php echo $wcatTerm->name; ?></a>
-
-            <?php if ($wcatTerm->term_id == $openCateID && count($catsToShow) > 0) {
-                $this->showCategories($catsToShow, $catsOpened, $realCateID);
-            } ?>
-
-		    </li>
-		    
-	    <?php 
-				
-		endforeach; 
-		   
-		echo '</ul>';
-    }		
-
 	
 
 	public function form( $instance ) {
-		
-		
 		if ( isset( $instance[ 'title' ] ) ) {
 			$title = $instance[ 'title' ];
 		} else {
 			$title = __( 'New title', 'customwcwidgettextdomain' );
 		}
-		
 		?>
 		<p>
 			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label> 
@@ -167,18 +130,12 @@ class Custom_WC_Widget extends WP_Widget {
 		</p>
 		<p>Nothing to see here, check the front end.</p>
 		<?php 
-			
-			
 	}
 
 	public function update( $new_instance, $old_instance ) {
-	
 		$instance = array();
-		
 		$instance['title'] = (!empty($new_instance['title'])) ? strip_tags($new_instance['title']) : '';
-		
 		return $instance;
-		
 	}
 }
 
